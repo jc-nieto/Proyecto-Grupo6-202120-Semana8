@@ -1,5 +1,7 @@
 from flask import Flask, jsonify
 from flask_restful import Api
+
+from api.resources import jwt
 from common.error_handling import ObjectNotFound, AppErrorBaseClass
 from db import db
 from api.api_resources import api_bp
@@ -16,6 +18,7 @@ def create_app(settings_module):
     db.create_all()
     marshmallow.init_app(app)
     migrate.init_app(app, db)
+    jwt.init_app(app)
 
     # Catch all errors 404
     Api(app, catch_all_404s=True)
