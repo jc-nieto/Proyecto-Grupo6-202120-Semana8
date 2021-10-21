@@ -2,7 +2,8 @@ from flask import Flask, jsonify
 from flask_restful import Api
 
 from api.resources import jwt
-from common.error_handling import ObjectNotFound, AppErrorBaseClass
+from api.tasks import celery_app
+from common.error_handling import ObjectNotFound, AppErrorBaseClass, NotAllowed, NotReady
 from db import db
 from api.api_resources import api_bp
 from ext import marshmallow, migrate
@@ -33,6 +34,17 @@ def create_app(settings_module):
     register_error_handlers(app)
     return app
 
+def make_celery(app):
+
+    celery_app.conf.update(app.config)
+
+    class ContextTask(celery_app.Task):
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
+
+    celery_app.Task = ContextTask
+    return celery_app
 
 def register_error_handlers(app):
 
@@ -59,3 +71,11 @@ def register_error_handlers(app):
     @app.errorhandler(ObjectNotFound)
     def handle_object_not_found_error(e):
         return jsonify({'msg': str(e)}), 404
+
+    @app.errorhandler(NotAllowed)
+    def handle_not_allowed(e):
+        return jsonify({'msg': str(e)}), 401
+
+    @app.errorhandler(NotReady)
+    def handle_not_ready(e):
+        return jsonify({'msg': str(e)}), 400

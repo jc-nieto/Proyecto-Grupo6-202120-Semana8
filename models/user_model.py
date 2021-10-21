@@ -1,7 +1,7 @@
-from db import db
+from db import BaseModelMixin, db
 
 
-class Usuario(db.Model):
+class Usuario(db.Model,BaseModelMixin):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(128), unique=True)
     contrasena = db.Column(db.String(50))
