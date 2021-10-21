@@ -31,3 +31,7 @@
 ```	
    flask run
 ```
+- Ejecución de plataforma de mensajeria desde la raiz del proyecto
+```
+   celery -A entrypoint.celery_app worker -l info -Q procesar
+```
