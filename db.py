@@ -7,9 +7,12 @@ class BaseModelMixin:
 
     query = None
 
-    def save(self):
+    def add(self):
         db.session.add(self)
         db.session.commit()
+
+    def save(self):
+        db.session.commit()    
 
     def delete(self):
         db.session.delete(self)

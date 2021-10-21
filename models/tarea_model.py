@@ -1,7 +1,7 @@
-from db import db
+from db import BaseModelMixin, db
 
 
-class Tarea(db.Model):
+class Tarea(db.Model, BaseModelMixin):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(128))
     inputpath = db.Column(db.String(128))

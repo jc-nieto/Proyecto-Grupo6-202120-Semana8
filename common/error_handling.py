@@ -5,3 +5,9 @@ class AppErrorBaseClass(Exception):
 
 class ObjectNotFound(AppErrorBaseClass):
     pass
+
+class NotAllowed(AppErrorBaseClass):
+    pass
+
+class NotReady(AppErrorBaseClass):
+    pass
