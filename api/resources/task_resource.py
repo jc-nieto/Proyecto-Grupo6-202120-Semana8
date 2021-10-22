@@ -47,8 +47,21 @@ class TaskResource(Resource):
     def put(self, task_id):
         return 'TO DO'
 
-    def delete(self, task_id):
-        return 'TO DO'
+    @jwt_required()
+    def delete(self, id_task):
+        tarea: Tarea = Tarea.get_by_id(id_task)
+        if tarea is None:
+            raise ObjectNotFound('La tarea no existe')
+        if tarea.usuario_task != get_jwt_identity():
+            raise NotAllowed('No tiene permisos para realizar ésta acción')
+        
+        celery_app.send_task('borrar_tarea', args=(tarea.id,), queue='procesar')
+        if os.path.exists(tarea.inputpath):
+            os.remove(tarea.inputpath)
+        if os.path.exists(tarea.outputpath):
+            os.remove(tarea.outputpath)
+                
+        return {'mensaje': 'La tarea fue borrada'}
 
 
 class TaskListResource(Resource):
