@@ -6,7 +6,7 @@ from models import Tarea
 from common.error_handling import NotAllowed, NotReady, ObjectNotFound,NotAllowed
 
 
-class FileView(Resource):
+class FileResource(Resource):
     @jwt_required()
     def get(self,id_task,type):
         tarea:Tarea = Tarea.get_by_id(id_task)

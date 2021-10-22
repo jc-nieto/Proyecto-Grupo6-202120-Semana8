@@ -13,7 +13,8 @@ from common.error_handling import ObjectNotFound, NotAllowed
 
 jwt = JWTManager()
 
-class VistaSignIn(Resource):
+
+class SignInResource(Resource):
     def post(self):
         try:
             if request.json["contrasena1"] != request.json["contrasena2"]:
@@ -28,7 +29,8 @@ class VistaSignIn(Resource):
         except IntegrityError as e:
             return {"mensaje": "Usuario ya Existe"}, 401
 
-class VistaLogIn(Resource):
+
+class LogInResource(Resource):
     def post(self):
         try:
             usuario = Usuario.query.filter(Usuario.nombre == request.json["nombre"]).first()

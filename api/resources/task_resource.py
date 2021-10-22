@@ -52,6 +52,7 @@ class TaskResource(Resource):
 
 
 class TaskListResource(Resource):
+
     @jwt_required()
     def get(self):
         user_id = get_jwt_identity()
@@ -61,6 +62,17 @@ class TaskListResource(Resource):
             raise ObjectNotFound('El usuario no existe')
 
         tareas: List[Tarea] = usuario.tareas
+        limit = request.args.get('max')
+        order = request.args.get('order')
+
+        if limit is not None:
+            tareas = tareas[:limit]
+
+        if order is not None and order == 0:
+            tareas.sort(key=lambda x: x.id)
+        elif order is not None and order == 1:
+            tareas.sort(key=lambda x: x.id, reverse=True)
+
         tareasJson = [withoutPaths(tarea_schema.dump(tarea)) for tarea in tareas]
         return tareasJson
 
