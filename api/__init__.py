@@ -55,6 +55,7 @@ def register_error_handlers(app):
 
     @app.errorhandler(IntegrityError)
     def handle_integrity_error(e):
+        db.session.rollback()
         return jsonify({'msg': 'El usuario ya existe', 'error': str(e)}), 400
 
 
