@@ -21,8 +21,16 @@ def convertFile(task_id):
     task:Tarea = Tarea.get_by_id(task_id)
     os.system('ffmpeg -i {} {}'.format(task.inputpath,task.outputpath))
 
+def deleteTask(task_id):
+    task:Tarea = Tarea.get_by_id(task_id)
+    task.delete()
 
 @celery_app.task(name="procesar_tarea")
 def cron(id_task):
     convertFile(id_task)
     changeTaskState(id_task)
+
+@celery_app.task(name="borrar_tarea")
+def delete(id_task):
+    deleteTask(id_task)
+    
