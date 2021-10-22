@@ -48,19 +48,41 @@ class TaskResource(Resource):
         return 'TO DO'
 
     @jwt_required()
+    def put(self, id_task):
+        uuid = uuid1()
+        tarea: Tarea = Tarea.get_by_id(id_task)
+        if tarea.usuario_task != get_jwt_identity():
+            raise NotAllowed('No tiene permisos para realizar ésta acción')
+        tasks: List[Tarea] = []
+        if os.path.exists(tarea.outputpath):
+            os.remove(tarea.outputpath)
+        try:
+            newFormat = request.form.get('newFormat')
+            outPath = os.path.join(OUTPUT_DIRECTORY, '{}.{}'.format(uuid, newFormat))
+            tarea.outputpath = outPath
+            tarea.estado = 'uploaded'
+            tarea.save()
+            tasks.append(tarea)
+            for task in tasks:
+                celery_app.send_task('procesar_tarea', args=(task.id,), queue='procesar')
+            return tarea_schema.dump(tarea)
+        except Exception as e:
+            print(e)
+
+    @jwt_required()
     def delete(self, id_task):
         tarea: Tarea = Tarea.get_by_id(id_task)
         if tarea is None:
             raise ObjectNotFound('La tarea no existe')
         if tarea.usuario_task != get_jwt_identity():
             raise NotAllowed('No tiene permisos para realizar ésta acción')
-        
+
         celery_app.send_task('borrar_tarea', args=(tarea.id,), queue='procesar')
         if os.path.exists(tarea.inputpath):
             os.remove(tarea.inputpath)
         if os.path.exists(tarea.outputpath):
             os.remove(tarea.outputpath)
-                
+
         return {'mensaje': 'La tarea fue borrada'}
 
 
