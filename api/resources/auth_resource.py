@@ -33,11 +33,11 @@ class SignInResource(Resource):
 class LogInResource(Resource):
     def post(self):
         try:
-            usuario = Usuario.query.filter(Usuario.nombre == request.json["nombre"]).first()
+            usuario = Usuario.query.filter(Usuario.username == request.json["username"]).first()
             if usuario is None:
                 return {"mensaje": "El usuario no existe"}, 404
             else:
-                checkPassword(usuario.contrasena, request.json["contrasena"])
+                checkPassword(usuario.contrasena, request.json["password"])
                 token_de_acceso = create_access_token(identity=usuario.id)
                 return {"mensaje": "Inicio de sesión exitoso", "token": token_de_acceso}
         except ValidationError as e:
