@@ -3,6 +3,7 @@ from flask_restful import Api
 
 from api.resources import jwt
 from api.tasks import celery_app
+from sqlalchemy.exc import IntegrityError
 from common.error_handling import ObjectNotFound, AppErrorBaseClass, NotAllowed, NotReady
 from db import db
 from api.api_resources import api_bp
@@ -50,7 +51,12 @@ def register_error_handlers(app):
 
     @app.errorhandler(Exception)
     def handle_exception_error(e):
-        return jsonify({'msg': 'Internal server error', 'error': str(e)}), 500
+        return jsonify({'msg': 'Internal server error', 'error': str(e)}), 400
+
+    @app.errorhandler(IntegrityError)
+    def handle_integrity_error(e):
+        return jsonify({'msg': 'El usuario ya existe', 'error': str(e)}), 400
+
 
     @app.errorhandler(405)
     def handle_405_error(e):
@@ -66,7 +72,7 @@ def register_error_handlers(app):
 
     @app.errorhandler(AppErrorBaseClass)
     def handle_app_base_error(e):
-        return jsonify({'msg': str(e)}), 500
+        return jsonify({'msg': str(e)}), 400
 
     @app.errorhandler(ObjectNotFound)
     def handle_object_not_found_error(e):

@@ -3,7 +3,6 @@ from __future__ import print_function
 from argon2.exceptions import VerifyMismatchError
 from flask_restful import Resource
 from flask import request
-from sqlalchemy.exc import IntegrityError
 from models import Usuario
 from db import db
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt, get_jwt_identity, JWTManager
@@ -16,18 +15,16 @@ jwt = JWTManager()
 
 class SignInResource(Resource):
     def post(self):
-        try:
-            if request.json["contrasena1"] != request.json["contrasena2"]:
-                raise NotAllowed("Las contraseñas no coinciden")
-            nuevo_usuario = Usuario(username=request.json["username"],
-                                    contrasena=encryptPassword(request.json["contrasena1"]),
-                                    email=request.json["email"])
-            db.session.add(nuevo_usuario)
-            db.session.commit()
-            token_de_acceso = create_access_token(identity=nuevo_usuario.id)
-            return {"mensaje": "usuario creado exitosamente", "token": token_de_acceso}
-        except IntegrityError as e:
-            return {"mensaje": "Usuario ya Existe"}, 401
+        if request.json["contrasena1"] != request.json["contrasena2"]:
+            raise NotAllowed("Las contraseñas no coinciden")
+        nuevo_usuario = Usuario(username=request.json["username"],
+                                contrasena=encryptPassword(request.json["contrasena1"]),
+                                email=request.json["email"])
+        db.session.add(nuevo_usuario)
+        db.session.commit()
+        token_de_acceso = create_access_token(identity=nuevo_usuario.id)
+        return {"mensaje": "usuario creado exitosamente", "token": token_de_acceso}
+
 
 
 class LogInResource(Resource):
