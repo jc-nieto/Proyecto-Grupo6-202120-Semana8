@@ -120,20 +120,26 @@ class TaskListResource(Resource):
             raise ObjectNotFound('El usuario no existe')
 
         lista = request.files.lists()
-        files: List[FileStorage] = [elem[1] for elem in lista][0]
+        files: List[FileStorage] = [elem[1] for elem in lista]
+        files = files[0]
         outputFormat = request.form.get('output_format')
         tasks: List[Tarea] = []
 
         for file in files:
             uuid = uuid1()
             inputFormat = obtainInputFormat(file)
-            savePath = os.path.join(UPLOAD_DIRECTORY, '{}.{}'.format(uuid, inputFormat))
+            savePath = os.path.join(UPLOAD_DIRECTORY, '{}.{}'.format('prueba', 'mp3'))
             outPath = os.path.join(OUTPUT_DIRECTORY, '{}.{}'.format(uuid, outputFormat))
-            print(savePath, outPath)
-            file.save(savePath)
+            # file.save(savePath)
             tarea = Tarea(nombre='{}'.format(uuid), inputpath=savePath, outputpath=outPath, usuario_task=user_id)
             tarea.add()
             tasks.append(tarea)
+
+        # uuid = uuid1()
+        # request.json
+        # inputPath = os.path.join(UPLOAD_DIRECTORY, '{}.{}'.format('prueba', 'mp3'))
+        # outPath = os.path.join(OUTPUT_DIRECTORY, '{}.{}'.format(uuid, outputFormat))
+        # tarea = Tarea(nombre='{}'.format(uuid), inputpath=inputPath, outputpath=outPath, usuario_task=user_id)
 
         for task in tasks:
             celery_app.send_task('procesar_tarea', args=(task.id,), queue='procesar')
