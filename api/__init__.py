@@ -51,6 +51,7 @@ def register_error_handlers(app):
 
     @app.errorhandler(Exception)
     def handle_exception_error(e):
+        db.session.rollback()
         print({'msg': 'Internal server error', 'error': str(e)})
         return jsonify({'msg': 'Internal server error', 'error': str(e)}), 400
 
