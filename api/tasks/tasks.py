@@ -4,7 +4,6 @@ import smtplib, ssl
 import db
 
 port = 587  # For SSL
-password = input("Type your password and press enter: ")
 
 from models import Tarea, Usuario
 
@@ -28,6 +27,7 @@ def convertFile(task_id):
     usuario: Usuario = Usuario.get_by_id(task.usuario_task)
     os.system('ffmpeg -i {} {}'.format(task.inputpath, task.outputpath))
     context = ssl.create_default_context()
+    
     with smtplib.SMTP("smtp.sendgrid.net", port) as server:
         server.ehlo()
         server.starttls()
