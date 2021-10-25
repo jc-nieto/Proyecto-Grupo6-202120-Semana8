@@ -39,10 +39,10 @@ class TaskResource(Resource):
     def get(self, id_task):
         db.session.expire_all()
         tarea: Tarea = Tarea.get_by_id(id_task)
-        if tarea.usuario_task != get_jwt_identity():
-            raise NotAllowed('No tiene permisos para realizar ésta acción')
         if tarea is None:
             raise ObjectNotFound('La tarea no existe')
+        if tarea.usuario_task != get_jwt_identity():
+            raise NotAllowed('No tiene permisos para realizar ésta acción')
         tareaJson = tarea_schema.dump(tarea)
         return tareaJson
 
