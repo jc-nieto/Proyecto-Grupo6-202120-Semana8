@@ -3,6 +3,11 @@
 ## How to run
 
 ### Api Back
+- Instalación de libreria ffmpeg
+```	
+   sudo apt	update
+   sudo apt install ffmpeg
+```
 - Instalación de las dependencias
 ```	
    python3 -m pip install -r requirements.txt 	
