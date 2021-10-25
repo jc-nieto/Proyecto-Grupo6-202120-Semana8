@@ -37,7 +37,7 @@ def obtainInputFormat(file):
 class TaskResource(Resource):
     @jwt_required()
     def get(self, id_task):
-        db.session.refresh()
+        db.session.expire_all()
         tarea: Tarea = Tarea.get_by_id(id_task)
         if tarea.usuario_task != get_jwt_identity():
             raise NotAllowed('No tiene permisos para realizar ésta acción')
@@ -93,7 +93,7 @@ class TaskListResource(Resource):
     @jwt_required()
     def get(self):
         user_id = get_jwt_identity()
-        db.session.refresh()
+        db.session.expire_all()
         usuario: Usuario = Usuario.get_by_id(user_id)
         if usuario is None:
             raise ObjectNotFound('El usuario no existe')
