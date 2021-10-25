@@ -18,9 +18,9 @@ OUTPUT_DIRECTORY = "./data/output"
 tarea_schema = TareaSchema()
 
 
-def withoutPaths(tarea):
-    inputpath, outputpath, rest = (lambda inputpath, outputpath, **rest: (inputpath, outputpath, rest))(**tarea)
-    return rest
+# def withoutPaths(tarea):
+#     inputpath, outputpath, rest = (lambda inputpath, outputpath, **rest: (inputpath, outputpath, rest))(**tarea)
+#     return rest
 
 
 def obtainInputFormat(file):
@@ -43,16 +43,15 @@ class TaskResource(Resource):
             raise NotAllowed('No tiene permisos para realizar ésta acción')
         if tarea is None:
             raise ObjectNotFound('La tarea no existe')
-        tareaJson = withoutPaths(tarea_schema.dump(tarea))
+        tareaJson = tarea_schema.dump(tarea)
         return tareaJson
-
-    def put(self, task_id):
-        return 'TO DO'
 
     @jwt_required()
     def put(self, id_task):
         uuid = uuid1()
         tarea: Tarea = Tarea.get_by_id(id_task)
+        if tarea is None:
+            raise ObjectNotFound('La tarea no existe')
         if tarea.usuario_task != get_jwt_identity():
             raise NotAllowed('No tiene permisos para realizar ésta acción')
         tasks: List[Tarea] = []
@@ -103,14 +102,14 @@ class TaskListResource(Resource):
         order = request.args.get('order')
 
         if limit is not None:
-            tareas = tareas[:limit]
+            tareas = tareas[:int(limit)]
 
-        if order is not None and order == 0:
+        if order is not None and int(order) == 0:
             tareas.sort(key=lambda x: x.id)
-        elif order is not None and order == 1:
+        elif order is not None and int(order) == 1:
             tareas.sort(key=lambda x: x.id, reverse=True)
 
-        tareasJson = [withoutPaths(tarea_schema.dump(tarea)) for tarea in tareas]
+        tareasJson = [tarea_schema.dump(tarea) for tarea in tareas]
         return tareasJson
 
     @jwt_required()
