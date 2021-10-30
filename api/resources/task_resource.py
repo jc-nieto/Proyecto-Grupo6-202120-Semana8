@@ -8,15 +8,17 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from common.error_handling import ObjectNotFound, NotAllowed
 from models import Tarea, Usuario
 from ..schemas import TareaSchema
-from ..tasks import celery_app
 import os
 from db import db
+from celery import Celery
+from config import CELERY_BROKER_URL
 
 UPLOAD_DIRECTORY = "./data/input"
 OUTPUT_DIRECTORY = "./data/output"
 
 tarea_schema = TareaSchema()
 
+celery_app = Celery('tasks', broker='CELERY_BROKER_URL')
 
 # def withoutPaths(tarea):
 #     inputpath, outputpath, rest = (lambda inputpath, outputpath, **rest: (inputpath, outputpath, rest))(**tarea)
