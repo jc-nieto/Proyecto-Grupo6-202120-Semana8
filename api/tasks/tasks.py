@@ -12,7 +12,7 @@ from config import CELERY_RESULT_BACKEND, CELERY_BROKER_URL
 celery_app = Celery(
     'tareas',
     backend=CELERY_RESULT_BACKEND,
-    broker=CELERY_RESULT_BACKEND
+    broker=CELERY_BROKER_URL
 )
 
 
