@@ -13,8 +13,8 @@ from db import db
 from celery import Celery
 from config import CELERY_RESULT_BACKEND, CELERY_BROKER_URL
 
-UPLOAD_DIRECTORY = "./data/input"
-OUTPUT_DIRECTORY = "./data/output"
+UPLOAD_DIRECTORY = "/nfs/home/ubuntu/input"
+OUTPUT_DIRECTORY = "/nfs/home/ubuntu/output"
 
 tarea_schema = TareaSchema()
 
