@@ -11,14 +11,14 @@ from ..schemas import TareaSchema
 import os
 from db import db
 from celery import Celery
-from config import CELERY_BROKER_URL
+from config import CELERY_RESULT_BACKEND, CELERY_BROKER_URL
 
 UPLOAD_DIRECTORY = "./data/input"
 OUTPUT_DIRECTORY = "./data/output"
 
 tarea_schema = TareaSchema()
 
-celery_app = Celery('tareas', broker='CELERY_BROKER_URL',backend='CELERY_BROKER_URL')
+celery_app = Celery('tareas', broker=CELERY_BROKER_URL)
 
 # def withoutPaths(tarea):
 #     inputpath, outputpath, rest = (lambda inputpath, outputpath, **rest: (inputpath, outputpath, rest))(**tarea)
