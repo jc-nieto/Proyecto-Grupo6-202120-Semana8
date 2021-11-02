@@ -18,7 +18,7 @@ OUTPUT_DIRECTORY = "./data/output"
 
 tarea_schema = TareaSchema()
 
-celery_app = Celery('tareas', broker='CELERY_BROKER_URL')
+celery_app = Celery('tareas', broker='CELERY_BROKER_URL',backend='CELERY_BROKER_URL')
 
 # def withoutPaths(tarea):
 #     inputpath, outputpath, rest = (lambda inputpath, outputpath, **rest: (inputpath, outputpath, rest))(**tarea)
