@@ -8,12 +8,17 @@ from common.error_handling import ObjectNotFound, AppErrorBaseClass, NotAllowed,
 from db import db
 from api.api_resources import api_bp
 from ext import marshmallow, migrate
+import logging
 
 
 def create_app(settings_module):
     app = Flask(__name__)
     app.config.from_object(settings_module)
     app.app_context().push()
+    gunicorn_error_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers.extend(gunicorn_error_logger.handlers)
+    app.logger.setLevel(logging.DEBUG)
+    app.logger.debug('this will show in the log')
 
     # Init extensions
     db.init_app(app)
