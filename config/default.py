@@ -1,7 +1,7 @@
 PROPAGATE_EXCEPTIONS = True
 
 # Database configuration
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://admin:gerzonEsUnCrack@mi-database-01.cw2jffeaugvm.us-east-1.rds.amazonaws.com:3306/myDB'
+SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://admin:gerzonEsUnCrack@mi-database-02.cw2jffeaugvm.us-east-1.rds.amazonaws.com:3306/myDB'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SHOW_SQLALCHEMY_LOG_MESSAGES = False
 JWT_SECRET_KEY = 'frase-secreta'
