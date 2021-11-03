@@ -15,6 +15,7 @@ jwt = JWTManager()
 
 class SignInResource(Resource):
     def post(self):
+        print(request.json)
         if request.json["contrasena1"] != request.json["contrasena2"]:
             raise NotAllowed("Las contraseñas no coinciden")
         nuevo_usuario = Usuario(username=request.json["username"],

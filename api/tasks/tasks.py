@@ -46,7 +46,10 @@ def deleteTask(task_id):
 
 @celery_app.task(name="procesar_tarea")
 def cron(id_task):
+    tarea:Tarea = Tarea.get_by_id(id_task)
     convertFile(id_task)
+    if os.path.exists(tarea.outputpath):
+        os.remove(tarea.outputpath)
     changeTaskState(id_task)
 
 
