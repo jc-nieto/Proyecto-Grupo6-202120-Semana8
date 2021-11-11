@@ -8,16 +8,13 @@ class BaseModelMixin:
     query = None
 
     def add(self):
-        db.session.expire_all()
         db.session.add(self)
         db.session.commit()
 
     def save(self):
-        db.session.expire_all()
         db.session.commit()    
 
     def delete(self):
-        db.session.expire_all()
         db.session.delete(self)
         db.session.commit()
 
