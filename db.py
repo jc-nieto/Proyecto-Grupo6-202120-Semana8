@@ -8,24 +8,30 @@ class BaseModelMixin:
     query = None
 
     def add(self):
+        db.session.expire_all()
         db.session.add(self)
         db.session.commit()
 
     def save(self):
+        db.session.expire_all()
         db.session.commit()    
 
     def delete(self):
+        db.session.expire_all()
         db.session.delete(self)
         db.session.commit()
 
     @classmethod
     def get_all(cls):
+        db.session.expire_all()
         return cls.query.all()
 
     @classmethod
     def get_by_id(cls, resource_id):
+        db.session.expire_all()
         return cls.query.get(resource_id)
 
     @classmethod
     def simple_filter(cls, **kwargs):
+        db.session.expire_all()
         return cls.query.filter_by(**kwargs).all()
