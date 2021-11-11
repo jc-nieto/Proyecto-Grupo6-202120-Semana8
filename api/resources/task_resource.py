@@ -39,6 +39,7 @@ def obtainInputFormat(file):
 class TaskResource(Resource):
     @jwt_required()
     def get(self, id_task):
+        db.session.expire_all()
         tarea: Tarea = Tarea.get_by_id(id_task)
         if tarea is None:
             raise ObjectNotFound('La tarea no existe')
@@ -92,6 +93,7 @@ class TaskListResource(Resource):
 
     @jwt_required()
     def get(self):
+        db.session.expire_all()
         user_id = get_jwt_identity()
         usuario: Usuario = Usuario.get_by_id(user_id)
         if usuario is None:

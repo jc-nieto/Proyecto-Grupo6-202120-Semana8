@@ -1,7 +1,7 @@
 from celery import Celery
 import os
 import smtplib, ssl
-import db
+from db import db
 
 port = 587  # For SSL
 
