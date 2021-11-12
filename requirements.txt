@@ -16,3 +16,4 @@ flask-marshmallow
 Flask-Migrate
 redis
 psycopg2-binary
+pymysql
