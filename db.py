@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 
-db = SQLAlchemy()
+db = SQLAlchemy(session_options={"expire_on_commit": True})
 
 
 class BaseModelMixin:
@@ -12,7 +12,6 @@ class BaseModelMixin:
         db.session.commit()
 
     def save(self):
-        db.session.expire_all()
         db.session.commit()    
 
     def delete(self):
