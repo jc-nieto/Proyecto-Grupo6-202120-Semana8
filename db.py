@@ -12,6 +12,7 @@ class BaseModelMixin:
         db.session.commit()
 
     def save(self):
+        db.session.expire_all()
         db.session.commit()    
 
     def delete(self):
