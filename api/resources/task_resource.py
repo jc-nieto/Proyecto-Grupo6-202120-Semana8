@@ -39,6 +39,7 @@ def obtainInputFormat(file):
 class TaskResource(Resource):
     @jwt_required()
     def get(self, id_task):
+        db.session.expire_all()
         tarea: Tarea = Tarea.get_by_id(id_task)
         if tarea is None:
             raise ObjectNotFound('La tarea no existe')
@@ -60,13 +61,15 @@ class TaskResource(Resource):
             os.remove(tarea.outputpath)
         try:
             newFormat = request.form.get('newFormat')
-            outPath = os.path.join(OUTPUT_DIRECTORY, '{}.{}'.format(uuid, newFormat))
+            outPath = os.path.join(
+                OUTPUT_DIRECTORY, '{}.{}'.format(uuid, newFormat))
             tarea.outputpath = outPath
             tarea.estado = 'uploaded'
             tarea.save()
             tasks.append(tarea)
             for task in tasks:
-                celery_app.send_task('procesar_tarea', args=(task.id,), queue='procesar')
+                celery_app.send_task('procesar_tarea', args=(
+                    task.id,), queue='procesar')
             return tarea_schema.dump(tarea)
         except Exception as e:
             print(e)
@@ -79,7 +82,8 @@ class TaskResource(Resource):
         if tarea.usuario_task != get_jwt_identity():
             raise NotAllowed('No tiene permisos para realizar ésta acción')
 
-        celery_app.send_task('borrar_tarea', args=(tarea.id,), queue='procesar')
+        celery_app.send_task('borrar_tarea', args=(
+            tarea.id,), queue='procesar')
         if os.path.exists(tarea.inputpath):
             os.remove(tarea.inputpath)
         if os.path.exists(tarea.outputpath):
@@ -93,6 +97,7 @@ class TaskListResource(Resource):
     @jwt_required()
     def get(self):
         user_id = get_jwt_identity()
+        db.session.expire_all()
         usuario: Usuario = Usuario.get_by_id(user_id)
         if usuario is None:
             raise ObjectNotFound('El usuario no existe')
@@ -128,15 +133,19 @@ class TaskListResource(Resource):
         for file in files:
             uuid = uuid1()
             inputFormat = obtainInputFormat(file)
-            savePath = os.path.join(UPLOAD_DIRECTORY, '{}.{}'.format(uuid, inputFormat))
-            outPath = os.path.join(OUTPUT_DIRECTORY, '{}.{}'.format(uuid, outputFormat))
+            savePath = os.path.join(
+                UPLOAD_DIRECTORY, '{}.{}'.format(uuid, inputFormat))
+            outPath = os.path.join(
+                OUTPUT_DIRECTORY, '{}.{}'.format(uuid, outputFormat))
             print(savePath, outPath)
             file.save(savePath)
-            tarea = Tarea(nombre='{}'.format(uuid), inputpath=savePath, outputpath=outPath, usuario_task=user_id)
+            tarea = Tarea(nombre='{}'.format(uuid), inputpath=savePath,
+                          outputpath=outPath, usuario_task=user_id)
             tarea.add()
             tasks.append(tarea)
 
         for task in tasks:
-            celery_app.send_task('procesar_tarea', args=(task.id,), queue='procesar')
+            celery_app.send_task('procesar_tarea', args=(
+                task.id,), queue='procesar')
 
         return {'mensaje': 'La tarea fue creada con éxito'}
