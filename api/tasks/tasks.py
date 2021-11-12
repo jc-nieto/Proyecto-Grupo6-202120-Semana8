@@ -25,18 +25,21 @@ def changeTaskState(task_id):
 def convertFile(task_id):
     task: Tarea = Tarea.get_by_id(task_id)
     usuario: Usuario = Usuario.get_by_id(task.usuario_task)
-    os.system('ffmpeg -i {} {}'.format(task.inputpath, task.outputpath))
-    context = ssl.create_default_context()
-    
-    with smtplib.SMTP("smtp.sendgrid.net", port) as server:
-        server.ehlo()
-        server.starttls()
-        server.ehlo()
-        server.login("apikey", password='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')
-        subject = 'Prueba'
-        body = 'Su archivo ha sido procesado'
-        msg = f'From:daniel@crecyservices.io\nSubject:{subject}\n\n{body}'
-        server.sendmail("daniel@crecyservices.io", usuario.email, msg)
+    try:
+        os.system('ffmpeg -i {} {}'.format(task.inputpath, task.outputpath))
+        context = ssl.create_default_context()
+        
+        with smtplib.SMTP("smtp.sendgrid.net", port) as server:
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+            server.login("apikey", password='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')
+            subject = 'Prueba'
+            body = 'Su archivo ha sido procesado'
+            msg = f'From:daniel@crecyservices.io\nSubject:{subject}\n\n{body}'
+            server.sendmail("daniel@crecyservices.io", usuario.email, msg)
+    except:
+        pass
 
 
 def deleteTask(task_id):
