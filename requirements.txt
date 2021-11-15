@@ -17,3 +17,5 @@ Flask-Migrate
 redis
 psycopg2-binary
 pymysql
+wheel
+gunicorn
