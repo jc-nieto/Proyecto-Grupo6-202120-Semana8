@@ -6,5 +6,7 @@ class Tarea(db.Model, BaseModelMixin):
     nombre = db.Column(db.String(128))
     inputpath = db.Column(db.String(128))
     outputpath = db.Column(db.String(128), nullable=True)
+    inputformat = db.Column(db.String(128))
+    outputformat = db.Column(db.String(128))
     estado = db.Column(db.String(128), default='uploaded', nullable=True)
     usuario_task = db.Column(db.Integer, db.ForeignKey("usuario.id"))

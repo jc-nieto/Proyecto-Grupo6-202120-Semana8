@@ -13,8 +13,9 @@ from db import db
 from celery import Celery
 from config import CELERY_RESULT_BACKEND, CELERY_BROKER_URL
 
-UPLOAD_DIRECTORY = "/nfs/input"
-OUTPUT_DIRECTORY = "/nfs/output"
+UPLOAD_DIRECTORY = "./data/input"
+OUTPUT_DIRECTORY = "./data/output"
+S3_NAME="filetransformer"
 
 tarea_schema = TareaSchema()
 
@@ -49,7 +50,6 @@ class TaskResource(Resource):
 
     @jwt_required()
     def put(self, id_task):
-        uuid = uuid1()
         tarea: Tarea = Tarea.get_by_id(id_task)
         if tarea is None:
             raise ObjectNotFound('La tarea no existe')
@@ -58,10 +58,11 @@ class TaskResource(Resource):
         tasks: List[Tarea] = []
         if os.path.exists(tarea.outputpath):
             os.remove(tarea.outputpath)
+        os.system(f'aws s3 rm s3://{S3_NAME}/output/{tarea.nombre}.{tarea.outputformat}') 
         try:
             newFormat = request.form.get('newFormat')
             outPath = os.path.join(
-                OUTPUT_DIRECTORY, '{}.{}'.format(uuid, newFormat))
+                OUTPUT_DIRECTORY, '{}.{}'.format(tarea.nombre, newFormat))
             tarea.outputpath = outPath
             tarea.estado = 'uploaded'
             tarea.save()
@@ -135,10 +136,11 @@ class TaskListResource(Resource):
                 UPLOAD_DIRECTORY, '{}.{}'.format(uuid, inputFormat))
             outPath = os.path.join(
                 OUTPUT_DIRECTORY, '{}.{}'.format(uuid, outputFormat))
-            print(savePath, outPath)
             file.save(savePath)
+            os.system(f'aws s3 cp {savePath} s3://{S3_NAME}/input/{uuid}.{inputFormat}')
+            os.system(f'sudo rm -rf {savePath}')
             tarea = Tarea(nombre='{}'.format(uuid), inputpath=savePath,
-                          outputpath=outPath, usuario_task=user_id)
+                          outputpath=outPath, usuario_task=user_id,inputformat=inputFormat,outputformat=outputFormat)
             tarea.add()
             tasks.append(tarea)
 
