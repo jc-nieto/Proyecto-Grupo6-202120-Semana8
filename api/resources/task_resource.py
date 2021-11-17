@@ -59,7 +59,7 @@ class TaskResource(Resource):
         tasks: List[Tarea] = []
         if os.path.exists(tarea.outputpath):
             os.remove(tarea.outputpath)
-        subprocess.call(['sudo','aws','s3','rm',f's3://{S3_NAME}/output/{tarea.nombre}.{tarea.outputformat}'])
+        subprocess.call(['aws','s3','rm',f's3://{S3_NAME}/output/{tarea.nombre}.{tarea.outputformat}'])
         try:
             newFormat = request.form.get('newFormat')
             outPath = os.path.join(
@@ -138,8 +138,8 @@ class TaskListResource(Resource):
             outPath = os.path.join(
                 OUTPUT_DIRECTORY, '{}.{}'.format(uuid, outputFormat))
             file.save(savePath)
-            subprocess.call(['sudo','aws','s3','cp',f'{savePath}',f's3://{S3_NAME}/input/{uuid}.{inputFormat}'])
-            subprocess.call(['sudo','rm','-rf',f'{savePath}'])
+            subprocess.call(['aws','s3','cp',f'{savePath}',f's3://{S3_NAME}/input/{uuid}.{inputFormat}'])
+            subprocess.call(['rm','-rf',f'{savePath}'])
             tarea = Tarea(nombre='{}'.format(uuid), inputpath=savePath,
                           outputpath=outPath, usuario_task=user_id,inputformat=inputFormat,outputformat=outputFormat)
             tarea.add()
