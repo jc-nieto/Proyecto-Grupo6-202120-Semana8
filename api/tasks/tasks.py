@@ -31,7 +31,7 @@ def convertFile(task_id):
     usuario: Usuario = Usuario.get_by_id(task.usuario_task)
     try:
         os.system('ffmpeg -i {} {}'.format(task.inputpath, task.outputpath))
-        os.system('sudo aws s3 cp {} s3://{}/output/{}.{}'.format(task.outputpath,S3_NAME,task.nombre,task.outputformat))
+        os.system('/usr/local/bin/aws s3 cp {} s3://{}/output/{}.{}'.format(task.outputpath,S3_NAME,task.nombre,task.outputformat))
         context = ssl.create_default_context()
         
         with smtplib.SMTP("smtp.sendgrid.net", port) as server:
@@ -48,7 +48,7 @@ def convertFile(task_id):
 
 def download_input_file(task_id):
     task: Tarea = Tarea.get_by_id(task_id)
-    os.system('sudo aws s3 cp s3://{}/input/{}.{} {}'.format(S3_NAME,task.nombre,task.inputformat,task.inputpath))
+    os.system('/usr/local/bin/aws s3 cp s3://{}/input/{}.{} {}'.format(S3_NAME,task.nombre,task.inputformat,task.inputpath))
 
 
 def deleteTask(task_id):
@@ -57,8 +57,8 @@ def deleteTask(task_id):
     task.delete()
 
 def delete_bucket_files(task: Tarea):
-    os.system('sudo aws s3 rm s3://{}/input/{}.{}'.format(S3_NAME,task.nombre,task.inputformat))
-    os.system('sudo aws s3 rm s3://{}/output/{}.{}'.format(S3_NAME,task.nombre,task.outputformat))
+    os.system('/usr/local/bin/aws s3 rm s3://{}/input/{}.{}'.format(S3_NAME,task.nombre,task.inputformat))
+    os.system('/usr/local/bin/aws s3 rm s3://{}/output/{}.{}'.format(S3_NAME,task.nombre,task.outputformat))
 
 def delete_files(task_id):
     task: Tarea = Tarea.get_by_id(task_id)
