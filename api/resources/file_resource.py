@@ -19,8 +19,8 @@ class FileResource(Resource):
     @jwt_required()
     def get(self,id_task,type):
         tarea:Tarea = Tarea.get_by_id(id_task)
-        subprocess.call(['aws','s3','cp',f's3://{S3_NAME}/input/{tarea.nombre}.{tarea.inputformat}',f'{UPLOAD_DIRECTORY}/{tarea.nombre}.{tarea.inputformat}'])
-        subprocess.call(['aws','s3','cp',f's3://{S3_NAME}/output/{tarea.nombre}.{tarea.outputformat}',f'{OUTPUT_DIRECTORY}/{tarea.nombre}.{tarea.outputformat}'])
+        subprocess.run(['aws','s3','cp',f's3://{S3_NAME}/input/{tarea.nombre}.{tarea.inputformat}',f'{UPLOAD_DIRECTORY}/{tarea.nombre}.{tarea.inputformat}'])
+        subprocess.run(['aws','s3','cp',f's3://{S3_NAME}/output/{tarea.nombre}.{tarea.outputformat}',f'{OUTPUT_DIRECTORY}/{tarea.nombre}.{tarea.outputformat}'])
         if tarea is None:
             raise ObjectNotFound
         if tarea.usuario_task != get_jwt_identity():
