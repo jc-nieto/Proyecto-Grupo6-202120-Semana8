@@ -24,14 +24,12 @@ class FileResource(Resource):
         if tarea.usuario_task != get_jwt_identity():
             raise NotAllowed('No tiene permisos para realizar ésta acción')
         if type =='input':
-            path = tarea.inputpath.replace('./data','data')
-            send_file(path)
-            os.remove(path)
+            send_file(os.path.join(tarea.inputpath))
+            os.remove(os.path.join(tarea.inputpath))
             return '',200
         elif tarea.estado == 'processed' and type =='output':
-            path = tarea.outputpath.replace('./data','data')
-            send_file(path)
-            os.remove(path)
+            send_file(os.path.join(tarea.outputpath))
+            os.remove(os.path.join(tarea.outputpath))
             return '',200
         else:
             raise NotReady('El archivo aún no esta listo')
