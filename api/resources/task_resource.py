@@ -58,7 +58,7 @@ class TaskResource(Resource):
         tasks: List[Tarea] = []
         if os.path.exists(tarea.outputpath):
             os.remove(tarea.outputpath)
-        os.system(f'sudo aws s3 rm s3://{S3_NAME}/output/{tarea.nombre}.{tarea.outputformat}') 
+        os.system(f'aws s3 rm s3://{S3_NAME}/output/{tarea.nombre}.{tarea.outputformat}') 
         try:
             newFormat = request.form.get('newFormat')
             outPath = os.path.join(
@@ -137,8 +137,8 @@ class TaskListResource(Resource):
             outPath = os.path.join(
                 OUTPUT_DIRECTORY, '{}.{}'.format(uuid, outputFormat))
             file.save(savePath)
-            os.system(f'sudo aws s3 cp {savePath} s3://{S3_NAME}/input/{uuid}.{inputFormat}')
-            os.system(f'sudo rm -rf {savePath}')
+            os.system(f'aws s3 cp {savePath} s3://{S3_NAME}/input/{uuid}.{inputFormat}')
+            os.system(f'rm -rf {savePath}')
             tarea = Tarea(nombre='{}'.format(uuid), inputpath=savePath,
                           outputpath=outPath, usuario_task=user_id,inputformat=inputFormat,outputformat=outputFormat)
             tarea.add()
