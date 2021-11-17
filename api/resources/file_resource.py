@@ -4,6 +4,7 @@ from flask import send_file
 from celery import Celery
 from config import CELERY_RESULT_BACKEND, CELERY_BROKER_URL
 import os
+import subprocess
 
 from models import Tarea
 from common.error_handling import NotAllowed, NotReady, ObjectNotFound,NotAllowed
@@ -18,8 +19,8 @@ class FileResource(Resource):
     @jwt_required()
     def get(self,id_task,type):
         tarea:Tarea = Tarea.get_by_id(id_task)
-        os.system(f'aws s3 cp s3://{S3_NAME}/input/{tarea.nombre}.{tarea.inputformat} {UPLOAD_DIRECTORY}/{tarea.nombre}.{tarea.inputformat}')
-        os.system(f'aws s3 cp s3://{S3_NAME}/output/{tarea.nombre}.{tarea.outputformat} {OUTPUT_DIRECTORY}/{tarea.nombre}.{tarea.outputformat}')
+        subprocess.call(['sudo','aws','s3','cp',f's3://{S3_NAME}/input/{tarea.nombre}.{tarea.inputformat}',f'{UPLOAD_DIRECTORY}/{tarea.nombre}.{tarea.inputformat}'])
+        subprocess.call(['sudo','aws','s3','cp',f's3://{S3_NAME}/output/{tarea.nombre}.{tarea.outputformat}',f'{OUTPUT_DIRECTORY}/{tarea.nombre}.{tarea.outputformat}'])
         if tarea is None:
             raise ObjectNotFound
         if tarea.usuario_task != get_jwt_identity():

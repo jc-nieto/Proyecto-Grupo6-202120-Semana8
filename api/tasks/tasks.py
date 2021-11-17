@@ -1,5 +1,6 @@
 from celery import Celery
 import os
+import subprocess
 import smtplib, ssl
 from db import db
 from time import sleep
@@ -31,8 +32,8 @@ def convertFile(task_id):
     task: Tarea = Tarea.get_by_id(task_id)
     usuario: Usuario = Usuario.get_by_id(task.usuario_task)
     try:
-        os.system('ffmpeg -i {} {}'.format(task.inputpath, task.outputpath))
-        os.system(f'aws s3 cp {task.outputpath} s3://{S3_NAME}/output/{task.nombre}.{task.inputformat}')
+        subprocess.call(['ffmpeg','-i',f'{task.inputpath}',f'{task.outputpath}'])
+        subprocess.call(['sudo','aws','s3','cp',f'{task.outputpath}',f's3://{S3_NAME}/output/{task.nombre}.{task.inputformat}'])
         context = ssl.create_default_context()
         
         with smtplib.SMTP("smtp.sendgrid.net", port) as server:
@@ -49,8 +50,7 @@ def convertFile(task_id):
 
 def download_input_file(task_id):
     task: Tarea = Tarea.get_by_id(task_id)
-    os.system(f'aws s3 cp s3://{S3_NAME}/input/{task.nombre}.{task.inputformat} {UPLOAD_DIRECTORY}/{task.nombre}.{task.inputformat}')
-
+    subprocess.call(['sudo','aws','s3','cp',f's3://{S3_NAME}/input/{task.nombre}.{task.inputformat}',f'{UPLOAD_DIRECTORY}/{task.nombre}.{task.inputformat}'])
 
 def deleteTask(task_id):
     task: Tarea = Tarea.get_by_id(task_id)
@@ -58,13 +58,13 @@ def deleteTask(task_id):
     task.delete()
 
 def delete_bucket_files(task: Tarea):
-    os.system(f'aws s3 rm s3://{S3_NAME}/input/{task.nombre}.{task.inputformat}')
-    os.system(f'aws s3 rm s3://{S3_NAME}/input/{task.nombre}.{task.outputformat}')
+    subprocess.call(['sudo','aws','s3','rm',f's3://{S3_NAME}/input/{task.nombre}.{task.inputformat}'])
+    subprocess.call(['sudo','aws','s3','rm',f's3://{S3_NAME}/output/{task.nombre}.{task.outputformat}'])
 
 def delete_files(task_id):
     task: Tarea = Tarea.get_by_id(task_id)
-    os.system(f'rm -rf {task.inputpath}')
-    os.system(f'rm -rf {task.outputpath}')
+    os.remove(task.inputpath)
+    os.remove(task.outputpath)
 
 
 @celery_app.task(name="procesar_tarea")

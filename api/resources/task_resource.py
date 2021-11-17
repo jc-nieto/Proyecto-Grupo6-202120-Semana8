@@ -9,6 +9,7 @@ from common.error_handling import ObjectNotFound, NotAllowed
 from models import Tarea, Usuario
 from ..schemas import TareaSchema
 import os
+import subprocess
 from db import db
 from celery import Celery
 from config import CELERY_RESULT_BACKEND, CELERY_BROKER_URL
@@ -58,7 +59,7 @@ class TaskResource(Resource):
         tasks: List[Tarea] = []
         if os.path.exists(tarea.outputpath):
             os.remove(tarea.outputpath)
-        os.system(f'aws s3 rm s3://{S3_NAME}/output/{tarea.nombre}.{tarea.outputformat}') 
+        subprocess.call(['sudo','aws','s3','rm',f's3://{S3_NAME}/output/{tarea.nombre}.{tarea.outputformat}'])
         try:
             newFormat = request.form.get('newFormat')
             outPath = os.path.join(
@@ -137,8 +138,8 @@ class TaskListResource(Resource):
             outPath = os.path.join(
                 OUTPUT_DIRECTORY, '{}.{}'.format(uuid, outputFormat))
             file.save(savePath)
-            os.system(f'aws s3 cp {savePath} s3://{S3_NAME}/input/{uuid}.{inputFormat}')
-            os.system(f'rm -rf {savePath}')
+            subprocess.call(['sudo','aws','s3','cp',f'{savePath}',f's3://{S3_NAME}/input/{uuid}.{inputFormat}'])
+            subprocess.call(['sudo','rm','-rf',f'{savePath}'])
             tarea = Tarea(nombre='{}'.format(uuid), inputpath=savePath,
                           outputpath=outPath, usuario_task=user_id,inputformat=inputFormat,outputformat=outputFormat)
             tarea.add()
