@@ -25,11 +25,13 @@ class FileResource(Resource):
             raise NotAllowed('No tiene permisos para realizar ésta acción')
         if type =='input':
             path = tarea.inputpath.replace('./data','../data')
-            celery_app.send_task('borrar_archivos', args=(tarea.id,), queue='procesar')
-            return send_file(path)
+            send_file(path)
+            os.remove(path)
+            return '',200
         elif tarea.estado == 'processed' and type =='output':
             path = tarea.outputpath.replace('./data','../data')
-            celery_app.send_task('borrar_archivos', args=(tarea.id,), queue='procesar')
-            return send_file(path)
+            send_file(path)
+            os.remove(path)
+            return '',200
         else:
             raise NotReady('El archivo aún no esta listo')
