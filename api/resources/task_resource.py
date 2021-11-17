@@ -65,6 +65,7 @@ class TaskResource(Resource):
             outPath = os.path.join(
                 OUTPUT_DIRECTORY, '{}.{}'.format(tarea.nombre, newFormat))
             tarea.outputpath = outPath
+            tarea.outputformat = newFormat
             tarea.estado = 'uploaded'
             tarea.save()
             tasks.append(tarea)
