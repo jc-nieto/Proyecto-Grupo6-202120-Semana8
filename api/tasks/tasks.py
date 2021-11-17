@@ -7,8 +7,6 @@ from time import sleep
 port = 587  # For SSL
 
 S3_NAME="filetransformer"
-UPLOAD_DIRECTORY = "./data/input"
-OUTPUT_DIRECTORY = "./data/output"
 
 from models import Tarea, Usuario
 
@@ -32,7 +30,7 @@ def convertFile(task_id):
     usuario: Usuario = Usuario.get_by_id(task.usuario_task)
     try:
         os.system('ffmpeg -i {} {}'.format(task.inputpath, task.outputpath))
-        os.system(f'sudo aws s3 cp {task.outputpath} s3://{S3_NAME}/output/{task.nombre}.{task.inputformat}')
+        os.system('sudo aws s3 cp {} s3://{}/output/{}.{}'.format(task.outputpath,S3_NAME,task.nombre,task.outputformat))
         context = ssl.create_default_context()
         
         with smtplib.SMTP("smtp.sendgrid.net", port) as server:
@@ -49,7 +47,7 @@ def convertFile(task_id):
 
 def download_input_file(task_id):
     task: Tarea = Tarea.get_by_id(task_id)
-    os.system(f'sudo aws s3 cp s3://{S3_NAME}/input/{task.nombre}.{task.inputformat} {UPLOAD_DIRECTORY}/{task.nombre}.{task.inputformat}')
+    os.system('sudo aws s3 cp s3://{}/input/{}.{} {}'.format(S3_NAME,task.nombre,task.inputformat,task.inputpath))
 
 
 def deleteTask(task_id):
@@ -58,13 +56,13 @@ def deleteTask(task_id):
     task.delete()
 
 def delete_bucket_files(task: Tarea):
-    os.system(f'sudo aws s3 rm s3://{S3_NAME}/input/{task.nombre}.{task.inputformat}')
-    os.system(f'sudo aws s3 rm s3://{S3_NAME}/input/{task.nombre}.{task.outputformat}')
+    os.system('sudo aws s3 rm s3://{}/input/{}.{}'.format(S3_NAME,task.nombre,task.inputformat))
+    os.system('sudo aws s3 rm s3://{}/output/{}.{}'.format(S3_NAME,task.nombre,task.outputformat))
 
 def delete_files(task_id):
     task: Tarea = Tarea.get_by_id(task_id)
-    os.system(f'sudo rm -rf {task.inputpath}')
-    os.system(f'sudo rm -rf {task.outputpath}')
+    os.remove(task.inputpath)
+    os.remove(task.outputpath)
 
 
 @celery_app.task(name="procesar_tarea")
