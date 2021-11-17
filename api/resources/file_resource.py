@@ -27,11 +27,11 @@ class FileResource(Resource):
             path = tarea.inputpath
             file = send_file(os.path.abspath(path))
             os.remove(os.path.abspath(path))
-            return file,200
+            
         elif tarea.estado == 'processed' and type =='output':
             path = tarea.outputpath
             file = send_file(os.path.abspath(path))
             os.remove(os.path.abspath(path))
-            return file,200
+            
         else:
             raise NotReady('El archivo aún no esta listo')
