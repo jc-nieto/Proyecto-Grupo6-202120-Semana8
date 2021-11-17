@@ -10,8 +10,6 @@ from models import Tarea
 from common.error_handling import NotAllowed, NotReady, ObjectNotFound,NotAllowed
 
 S3_NAME="filetransformer"
-UPLOAD_DIRECTORY = "./data/input"
-OUTPUT_DIRECTORY = "./data/output"
 
 celery_app = Celery('tareas', broker=CELERY_BROKER_URL)
 
@@ -19,8 +17,8 @@ class FileResource(Resource):
     @jwt_required()
     def get(self,id_task,type):
         tarea:Tarea = Tarea.get_by_id(id_task)
-        subprocess.run(['aws','s3','cp',f's3://{S3_NAME}/input/{tarea.nombre}.{tarea.inputformat}',f'{UPLOAD_DIRECTORY}/{tarea.nombre}.{tarea.inputformat}'])
-        subprocess.run(['aws','s3','cp',f's3://{S3_NAME}/output/{tarea.nombre}.{tarea.outputformat}',f'{OUTPUT_DIRECTORY}/{tarea.nombre}.{tarea.outputformat}'])
+        os.system('sudo aws s3 cp s3://{}/input/{}.{} {}'.format(S3_NAME,tarea.nombre,tarea.inputformat,tarea.inputpath))
+        os.system('sudo aws s3 cp s3://{}/output/{}.{} {}'.format(S3_NAME,tarea.nombre,tarea.outputformat,tarea.outputpath))
         if tarea is None:
             raise ObjectNotFound
         if tarea.usuario_task != get_jwt_identity():
