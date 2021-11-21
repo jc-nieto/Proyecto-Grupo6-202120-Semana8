@@ -126,25 +126,27 @@ class TaskListResource(Resource):
         if usuario is None:
             raise ObjectNotFound('El usuario no existe')
 
-        lista = request.files.lists()
-        files: List[FileStorage] = [elem[1] for elem in lista][0]
+        # lista = request.files.lists()
+        # files: List[FileStorage] = [elem[1] for elem in lista][0]
+        # file = files[0]
         outputFormat = request.form.get('output_format')
         tasks: List[Tarea] = []
 
-        for file in files:
-            uuid = uuid1()
-            inputFormat = obtainInputFormat(file)
-            savePath = os.path.join(
-                UPLOAD_DIRECTORY, '{}.{}'.format(uuid, inputFormat))
-            outPath = os.path.join(
-                OUTPUT_DIRECTORY, '{}.{}'.format(uuid, outputFormat))
-            file.save(savePath)
-            os.system('/usr/local/bin/aws s3 cp {} s3://{}/input/{}.{}'.format(savePath,S3_NAME,uuid,inputFormat))
-            os.remove(savePath)
-            tarea = Tarea(nombre='{}'.format(uuid), inputpath=savePath,
-                          outputpath=outPath, usuario_task=user_id,inputformat=inputFormat,outputformat=outputFormat)
-            tarea.add()
-            tasks.append(tarea)
+        # for file in files:
+        uuid = uuid1()
+        file_sample = "file_example_MP3_5MG"
+        inputFormat = "mp3"
+        savePath = os.path.join(
+            UPLOAD_DIRECTORY, file_sample)
+        outPath = os.path.join(
+            OUTPUT_DIRECTORY, '{}.{}'.format(uuid, outputFormat))
+        # file.save(savePath)
+        os.system('/usr/local/bin/aws s3 cp {} s3://{}/input/{}.{}'.format(savePath,S3_NAME,uuid,inputFormat))
+        # os.remove(savePath)
+        tarea = Tarea(nombre='{}'.format(uuid), inputpath=savePath,
+                        outputpath=outPath, usuario_task=user_id,inputformat=inputFormat,outputformat=outputFormat)
+        tarea.add()
+        tasks.append(tarea)
 
         for task in tasks:
             celery_app.send_task('procesar_tarea', args=(

@@ -3,6 +3,7 @@ data/input/*
 data/output/*
 data/test.db
 !data/input/.gitkeep
+!data/input/file_example_MP3_5MG.mp3
 !data/output/.gitkeep
 .idea/
 
