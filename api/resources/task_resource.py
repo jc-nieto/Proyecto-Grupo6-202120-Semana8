@@ -137,7 +137,7 @@ class TaskListResource(Resource):
         file_sample = "file_example_MP3_5MG"
         inputFormat = "mp3"
         savePath = os.path.join(
-            UPLOAD_DIRECTORY, file_sample,inputFormat)
+            UPLOAD_DIRECTORY, file_sample+'.'+inputFormat)
         outPath = os.path.join(
             OUTPUT_DIRECTORY, '{}.{}'.format(uuid, outputFormat))
         # file.save(savePath)
