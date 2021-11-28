@@ -5,13 +5,13 @@ from aws import *
 
 def get_file(task):
     file_name = '{0}.{1}'.format(task.nombre, task.inputformat)
-    download_file(file_name)
+    download_file(file_name, task.inputpath)
 
 
 def convert_file(task):
     os.system('ffmpeg -i {} {}'.format(task.inputpath, task.outputpath))
     file_name = '{0}.{1}'.format(task.nombre, task.outputformat)
-    upload_file(file_name)
+    upload_file(file_name, task.outputpath)
 
 
 def change_state(task):
@@ -43,7 +43,7 @@ def process_messages():
     more_messages = True
 
     while more_messages:
-        messages = receive_messages(10, 5)
+        messages = receive_messages(1, 20)
 
         for message in messages:
             if message.message_attributes is None:
