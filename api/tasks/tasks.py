@@ -7,7 +7,7 @@ from time import sleep
 
 port = 587  # For SSL
 
-S3_NAME="filetransformer"
+S3_NAME="filetransformeraws4"
 
 from models import Tarea, Usuario
 

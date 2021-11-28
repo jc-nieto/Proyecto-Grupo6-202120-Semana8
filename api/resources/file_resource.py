@@ -9,7 +9,7 @@ import subprocess
 from models import Tarea
 from common.error_handling import NotAllowed, NotReady, ObjectNotFound,NotAllowed
 
-S3_NAME="filetransformer"
+S3_NAME="filetransformeraws4"
 
 celery_app = Celery('tareas', broker=CELERY_BROKER_URL)
 

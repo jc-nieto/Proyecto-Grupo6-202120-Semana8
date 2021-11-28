@@ -16,7 +16,7 @@ from config import CELERY_RESULT_BACKEND, CELERY_BROKER_URL
 
 UPLOAD_DIRECTORY = "./data/input"
 OUTPUT_DIRECTORY = "./data/output"
-S3_NAME="filetransformer"
+S3_NAME="filetransformeraws4"
 
 tarea_schema = TareaSchema()
 
