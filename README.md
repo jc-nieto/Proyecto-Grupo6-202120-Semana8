@@ -5,7 +5,7 @@
 ### Worker
 - Instalación de libreria ffmpeg
 ```	
-   sudo apt	update
+   sudo apt update
    sudo apt install ffmpeg
 ```
 - Instalación de las dependencias

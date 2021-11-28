@@ -1,88 +1,41 @@
 import os
-import boto3
-from botocore.exceptions import ClientError
 from models import Tarea
+from aws import *
 
 
-aws_access_key = "ASIAZTRV6XHVA2X3HTMT"
-aws_secret_key = "mXfNHkXLoXOFKAdS9InqoNY5PlI30uIDABBw2557"
-aws_session_token = "FwoGZXIvYXdzEPT//////////wEaDARL/fK14T3j5eFwOCLMASDuyx/PPn1KfVGV+LKZBWKsBKK96prUfvLDmjykvMLUkp19TN4fguDy0brPzwzUGscCcjouhG7gnp4ZaZ0bqTnQa4CEZI6aB+QmPZ6+JuTHgZhNt5r4Q+2D51WF+COMco/ToiCaPuF3o1VBxRyWQNe25YP6sY1RQ4en+HSzeiJYlN+fo27o97rCqDNHovShXmXM/IYoSHZf9kh0buSVBL2XX0FL3wjz/Fty5DxKVMQ4CrcQwmn4nNBTF8omIqdjuAYhTLv/Eb8cKwyKaijG8YmNBjItL65/20gmz+Ll69xr8uCBHcOYzShBq0pKg4l2jWYhTgY7z5sOQZ50mxm1SX65"
-
-# Get the service resource
-sqs = boto3.resource(
-    'sqs',
-    region_name='us-east-1',
-    aws_access_key_id=aws_access_key,
-    aws_secret_access_key=aws_secret_key,
-    aws_session_token=aws_session_token
-)
-'''
-sqs = boto3.resource(
-    'sqs',
-    region_name='us-east-1'
-)
-'''
-queue = sqs.get_queue_by_name(QueueName='consumers-queue.fifo')
-print('Connected to: {0}!'.format(queue.url))
-
-response = queue.send_message(
-    MessageBody="1",
-    MessageGroupId="process_task",
-    MessageAttributes={'Task': {
-        'StringValue': 'process_task',
-        'DataType': 'String'
-        }
-    }
-)
+def get_file(task):
+    file_name = '{0}.{1}'.format(task.nombre, task.inputformat)
+    download_file(file_name)
 
 
-def delete_message(message):
-    try:
-        message.delete()
-    except ClientError as error:
-        print('Could not delete message: {0}'.format(message.message_id))
-        raise error
-
-
-def receive_messages(max_number, wait_time):
-    try:
-        messages = queue.receive_messages(
-            MessageAttributeNames=['All'],
-            MaxNumberOfMessages=max_number,
-            WaitTimeSeconds=wait_time
-        )
-    except ClientError as error:
-        print('Could not receive messages from queue: {0}'.format(queue))
-        raise error
-    else:
-        return messages
-
-
-def convert_file(task_id):
-    task: Tarea = Tarea.get_by_id(task_id)
-    if task is None:
-        print('Task not exist')
-        return
+def convert_file(task):
     os.system('ffmpeg -i {} {}'.format(task.inputpath, task.outputpath))
+    file_name = '{0}.{1}'.format(task.nombre, task.outputformat)
+    upload_file(file_name)
 
 
-def change_state(task_id):
-    task: Tarea = Tarea.get_by_id(task_id)
-    if task is None:
-        return
+def change_state(task):
+    task: Tarea = Tarea.get_by_id(task.id)
     task.estado = 'processed'
     task.save()
 
 
-def process_task(message):
-    convert_file(message)
-    change_state(message)
+def delete_local_files(task):
+    os.remove(task.inputpath)
+    os.remove(task.outputpath)
 
 
-def delete_task(message):
-    task: Tarea = Tarea.get_by_id(message)
-    if task is None:
-        return
+def process_task(task):
+    get_file(task)
+    convert_file(task)
+    change_state(task)
+    delete_local_files(task)
+
+
+def delete_task(task):
+    file_path = '{0}.{1}'.format(task.nombre, task.inputformat)
+    delete_file('input/{0}'.format(file_path))
+    delete_file('output/{0}'.format(file_path))
     task.delete()
 
 
@@ -100,10 +53,18 @@ def process_messages():
             print("Received message - Id: {0} Message {1}".format(message.message_id, message.body))
             process = message.message_attributes.get('Task').get('StringValue')
 
+            task_id = message.body
+            task: Tarea = Tarea.get_by_id(task_id)
+
+            if task is None:
+                print('Task not exist')
+                delete_message(message)
+                continue
+
             if process == 'process_task':
-                process_task(message.body)
+                process_task(task)
             elif process == 'delete_task':
-                delete_task(message.body)
+                delete_task(task)
 
             delete_message(message)
 
