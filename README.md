@@ -2,7 +2,7 @@
 
 ## How to run
 
-### Api Back
+### Worker
 - Instalación de libreria ffmpeg
 ```	
    sudo apt	update
@@ -12,13 +12,8 @@
 ```	
    python3 -m pip install -r requirements.txt 	
 ```
-- Crear las siguientes variables de entorno 
-
-```	
-   export FLASK_APP="entrypoint:app"
+- Ejecución del worker
 ```
-- Ejecución de la API
-```
-   export FLASK_APP="entrypoint:app"
+   export FLASK_APP="entrypoint:worker"
    flask run
 ```

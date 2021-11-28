@@ -4,7 +4,6 @@ PROPAGATE_EXCEPTIONS = True
 SQLALCHEMY_DATABASE_URI = 'sqlite:///convert.db'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SHOW_SQLALCHEMY_LOG_MESSAGES = False
-JWT_SECRET_KEY = 'frase-secreta'
 
 # Bucket S3
 S3_NAME = "filetransformer"
