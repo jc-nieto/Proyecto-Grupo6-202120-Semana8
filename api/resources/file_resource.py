@@ -4,29 +4,33 @@ from flask import send_file
 import os
 from models import Tarea
 from common.error_handling import NotReady, ObjectNotFound, NotAllowed
-
-S3_NAME = "bucket-files-convertion"
+from aws import download_file
 
 
 class FileResource(Resource):
 
     @jwt_required()
-    def get(self, id_task, type):
-        tarea:Tarea = Tarea.get_by_id(id_task)
+    def get(self, id_task, type_process):
+        tarea: Tarea = Tarea.get_by_id(id_task)
 
         if tarea is None:
             raise ObjectNotFound
         if tarea.usuario_task != get_jwt_identity():
             raise NotAllowed('No tiene permisos para realizar ésta acción')
-        if type == 'input':
-            os.system('/usr/local/bin/aws s3 cp s3://{}/input/{}.{} {}'.format(S3_NAME,tarea.nombre,tarea.inputformat,tarea.inputpath))
+
+        file_name = '{0}.{1}'.format(tarea.nombre, tarea.inputformat)
+
+        if type_process == 'input':
             path = tarea.inputpath
+            download_file(file_name, path, type_process)
+
             file = send_file(os.path.abspath(path))
             os.remove(os.path.abspath(path))
             return file
-        elif tarea.estado == 'processed' and type == 'output':
-            os.system('/usr/local/bin/aws s3 cp s3://{}/output/{}.{} {}'.format(S3_NAME,tarea.nombre,tarea.outputformat,tarea.outputpath))
+        elif tarea.estado == 'processed' and type_process == 'output':
             path = tarea.outputpath
+            download_file(file_name, path, type_process)
+
             file = send_file(os.path.abspath(path))
             os.remove(os.path.abspath(path))
             return file

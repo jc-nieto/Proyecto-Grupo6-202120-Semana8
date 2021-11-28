@@ -16,3 +16,16 @@ if APP_DEV:
     )
 
 queue = sqs.get_queue_by_name(QueueName=QUEUE_NAME)
+print('Connected to: {0}!'.format(queue.url))
+
+
+def send_message(process, message):
+    queue.send_message(
+        MessageBody=str(message),
+        MessageGroupId=process,
+        MessageAttributes={'Task': {
+            'StringValue': process,
+            'DataType': 'String'
+            }
+        }
+    )

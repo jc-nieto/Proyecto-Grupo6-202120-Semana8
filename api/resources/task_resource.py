@@ -3,95 +3,84 @@ from flask_restful import Resource
 from uuid import uuid1
 from typing import List
 from flask_jwt_extended import get_jwt_identity, jwt_required
+from werkzeug.datastructures import FileStorage
 from common.error_handling import ObjectNotFound, NotAllowed
 from models import Tarea, Usuario
 from ..schemas import TareaSchema
 import os
-from ..aws import queue
+from aws import delete_file, upload_file, send_message
 
 
 UPLOAD_DIRECTORY = "./data/input"
 OUTPUT_DIRECTORY = "./data/output"
-S3_NAME = "bucket-files-convertion"
-
-tarea_schema = TareaSchema()
+schema_task = TareaSchema()
 
 
-def obtainInputFormat(file):
-    outputFormat = ''
+def obtain_input_format(file):
+    output_format = ''
     for char in reversed(file.filename):
         if char != '.':
-            outputFormat += char
+            output_format += char
         else:
             break
-    outputFormat = outputFormat[::-1]
-    return outputFormat
-
-
-def send_message(process, message):
-    print('Connected to: {0}!'.format(queue.url))
-    queue.send_message(
-        MessageBody=str(message),
-        MessageGroupId=process,
-        MessageAttributes={'Task': {
-            'StringValue': process,
-            'DataType': 'String'
-            }
-        }
-    )
+    output_format = output_format[::-1]
+    return output_format
 
 
 class TaskResource(Resource):
 
     @jwt_required()
     def get(self, id_task):
-        tarea: Tarea = Tarea.get_by_id(id_task)
-        if tarea is None:
+        task: Tarea = Tarea.get_by_id(id_task)
+        if task is None:
             raise ObjectNotFound('La tarea no existe')
-        if tarea.usuario_task != get_jwt_identity():
+        if task.usuario_task != get_jwt_identity():
             raise NotAllowed('No tiene permisos para realizar ésta acción')
-        tareaJson = tarea_schema.dump(tarea)
-        return tareaJson
+        json = schema_task.dump(task)
+        return json
 
     @jwt_required()
     def put(self, id_task):
-        tarea: Tarea = Tarea.get_by_id(id_task)
-        if tarea is None:
+        task: Tarea = Tarea.get_by_id(id_task)
+        if task is None:
             raise ObjectNotFound('La tarea no existe')
-        if tarea.usuario_task != get_jwt_identity():
+        if task.usuario_task != get_jwt_identity():
             raise NotAllowed('No tiene permisos para realizar ésta acción')
         tasks: List[Tarea] = []
-        if os.path.exists(tarea.outputpath):
-            os.remove(tarea.outputpath)
-        os.system('/usr/local/bin/aws s3 rm s3://{}/output/{}.{}'.format(S3_NAME, tarea.nombre, tarea.outputformat))
+        if os.path.exists(task.outputpath):
+            os.remove(task.outputpath)
+        # Delete file.
+        file_name = '{0}.{1}'.format(task.nombre, task.outputformat)
+        delete_file(file_name)
+        # os.system('/usr/local/bin/aws s3 rm s3://{}/output/{}.{}'.format(S3_NAME, tarea.nombre, tarea.outputformat))
         try:
-            newFormat = request.form.get('newFormat')
-            outPath = os.path.join(
-                OUTPUT_DIRECTORY, '{}.{}'.format(tarea.nombre, newFormat))
-            tarea.outputpath = outPath
-            tarea.outputformat = newFormat
-            tarea.estado = 'uploaded'
-            tarea.save()
-            tasks.append(tarea)
-            for task in tasks:
-                send_message('process_task', task.id)
-            return tarea_schema.dump(tarea)
+            new_format = request.form.get('newFormat')
+            output_path = os.path.join(
+                OUTPUT_DIRECTORY, '{}.{}'.format(task.nombre, new_format))
+            task.outputpath = output_path
+            task.outputformat = new_format
+            task.estado = 'uploaded'
+            task.save()
+            tasks.append(task)
+            for task_item in tasks:
+                send_message('process_task', task_item.id)
+            return schema_task.dump(task)
         except Exception as e:
             print(e)
 
     @jwt_required()
     def delete(self, id_task):
-        tarea: Tarea = Tarea.get_by_id(id_task)
-        if tarea is None:
+        task: Tarea = Tarea.get_by_id(id_task)
+        if task is None:
             raise ObjectNotFound('La tarea no existe')
-        if tarea.usuario_task != get_jwt_identity():
+        if task.usuario_task != get_jwt_identity():
             raise NotAllowed('No tiene permisos para realizar ésta acción')
 
-        send_message('delete_task', tarea.id)
-        if os.path.exists(tarea.inputpath):
-            os.remove(tarea.inputpath)
-        if os.path.exists(tarea.outputpath):
-            os.remove(tarea.outputpath)
+        send_message('delete_task', task.id)
+        if os.path.exists(task.inputpath):
+            os.remove(task.inputpath)
+        if os.path.exists(task.outputpath):
+            os.remove(task.outputpath)
 
         return {'mensaje': 'La tarea fue borrada'}
 
@@ -101,55 +90,60 @@ class TaskListResource(Resource):
     @jwt_required()
     def get(self):
         user_id = get_jwt_identity()
-        usuario: Usuario = Usuario.get_by_id(user_id)
-        if usuario is None:
+        user: Usuario = Usuario.get_by_id(user_id)
+        if user is None:
             raise ObjectNotFound('El usuario no existe')
 
-        tareas: List[Tarea] = usuario.tareas
+        tasks: List[Tarea] = user.tareas
         limit = request.args.get('max')
         order = request.args.get('order')
 
         if limit is not None:
-            tareas = tareas[:int(limit)]
+            tasks = tasks[:int(limit)]
 
         if order is not None and int(order) == 0:
-            tareas.sort(key=lambda x: x.id)
+            tasks.sort(key=lambda x: x.id)
         elif order is not None and int(order) == 1:
-            tareas.sort(key=lambda x: x.id, reverse=True)
+            tasks.sort(key=lambda x: x.id, reverse=True)
 
-        tareasJson = [tarea_schema.dump(tarea) for tarea in tareas]
-        return tareasJson
-
+        json = [schema_task.dump(task) for task in tasks]
+        return json
 
     @jwt_required()
     def post(self):
         user_id = get_jwt_identity()
 
-        usuario = Usuario.get_by_id(user_id)
-        if usuario is None:
+        user = Usuario.get_by_id(user_id)
+        if user is None:
             raise ObjectNotFound('El usuario no existe')
 
-        lista = request.files.lists()
-        files: List[FileStorage] = [elem[1] for elem in lista][0]
-        outputFormat = request.form.get('output_format')
+        list_files = request.files.lists()
+        files: List[FileStorage] = [elem[1] for elem in list_files][0]
+        output_format = request.form.get('output_format')
         tasks: List[Tarea] = []
 
         for file in files:
             uuid = uuid1()
-            inputFormat = obtainInputFormat(file)
-            savePath = os.path.join(
-                UPLOAD_DIRECTORY, '{}.{}'.format(uuid, inputFormat))
-            outPath = os.path.join(
-                OUTPUT_DIRECTORY, '{}.{}'.format(uuid, outputFormat))
-            file.save(savePath)
-            os.system('/usr/local/bin/aws s3 cp {} s3://{}/input/{}.{}'.format(savePath,S3_NAME,uuid,inputFormat))
-            os.remove(savePath)
-            tarea = Tarea(nombre='{}'.format(uuid), inputpath=savePath,
-                          outputpath=outPath, usuario_task=user_id,inputformat=inputFormat,outputformat=outputFormat)
-            tarea.add()
-            tasks.append(tarea)
+            input_format = obtain_input_format(file)
+            input_path = os.path.join(UPLOAD_DIRECTORY, '{0}.{1}'.format(uuid, input_format))
+            output_path = os.path.join(OUTPUT_DIRECTORY, '{0}.{1}'.format(uuid, output_format))
+            file.save(input_path)
+            file_name = '{0}.{1}'.format(uuid, input_format)
+            upload_file(file_name, input_path, 'input')
 
-        for task in tasks:
-            send_message('process_task', task.id)
+            os.remove(input_path)
+            task = Tarea(
+                nombre='{}'.format(uuid),
+                inputpath=input_path,
+                outputpath=output_path,
+                usuario_task=user_id,
+                inputformat=input_format,
+                outputformat=output_format
+            )
+            task.add()
+            tasks.append(task)
+
+        for item_task in tasks:
+            send_message('process_task', item_task.id)
 
         return {'mensaje': 'La tarea fue creada con éxito'}
