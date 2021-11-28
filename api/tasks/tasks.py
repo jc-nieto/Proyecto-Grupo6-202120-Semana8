@@ -11,12 +11,13 @@ S3_NAME="filetransformeraws4"
 
 from models import Tarea, Usuario
 
-from config import CELERY_RESULT_BACKEND, CELERY_BROKER_URL
+from config import CELERY_RESULT_BACKEND, CELERY_BROKER_URL, BROKER_TRANSPORT_OPTIONS
 
 celery_app = Celery(
     'tareas',
     backend=CELERY_RESULT_BACKEND,
-    broker=CELERY_RESULT_BACKEND
+    broker=CELERY_BROKER_URL,
+    broker_transport_options = BROKER_TRANSPORT_OPTIONS
 )
 
 

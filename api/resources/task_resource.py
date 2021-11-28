@@ -12,7 +12,7 @@ import os
 import subprocess
 from db import db
 from celery import Celery
-from config import CELERY_RESULT_BACKEND, CELERY_BROKER_URL
+from config import CELERY_RESULT_BACKEND, CELERY_BROKER_URL, BROKER_TRANSPORT_OPTIONS
 
 UPLOAD_DIRECTORY = "./data/input"
 OUTPUT_DIRECTORY = "./data/output"
@@ -20,7 +20,7 @@ S3_NAME="filetransformeraws4"
 
 tarea_schema = TareaSchema()
 
-celery_app = Celery('tareas', broker=CELERY_BROKER_URL)
+celery_app = Celery('tareas', broker=CELERY_BROKER_URL, broker_transport_options = BROKER_TRANSPORT_OPTIONS)
 
 # def withoutPaths(tarea):
 #     inputpath, outputpath, rest = (lambda inputpath, outputpath, **rest: (inputpath, outputpath, rest))(**tarea)

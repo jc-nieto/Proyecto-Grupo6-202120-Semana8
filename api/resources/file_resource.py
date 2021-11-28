@@ -2,7 +2,7 @@ from flask_restful import Resource
 from flask_jwt_extended import jwt_required,get_jwt_identity
 from flask import send_file
 from celery import Celery
-from config import CELERY_RESULT_BACKEND, CELERY_BROKER_URL
+from config import CELERY_RESULT_BACKEND, CELERY_BROKER_URL, BROKER_TRANSPORT_OPTIONS
 import os
 import subprocess
 
@@ -11,7 +11,7 @@ from common.error_handling import NotAllowed, NotReady, ObjectNotFound,NotAllowe
 
 S3_NAME="filetransformeraws4"
 
-celery_app = Celery('tareas', broker=CELERY_BROKER_URL)
+celery_app = Celery('tareas', broker=CELERY_BROKER_URL, broker_transport_options = BROKER_TRANSPORT_OPTIONS)
 
 class FileResource(Resource):
     @jwt_required()

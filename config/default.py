@@ -6,4 +6,10 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 SHOW_SQLALCHEMY_LOG_MESSAGES = False
 JWT_SECRET_KEY = 'frase-secreta'
 CELERY_BROKER_URL='sqs://',
-CELERY_RESULT_BACKEND='sqs://'
+CELERY_RESULT_BACKEND=None
+BROKER_TRANSPORT_OPTIONS = {
+    'region': 'us-east-1', 
+    'polling_interval': 60, 
+    "queue_name_prefix": "first_sqs"
+
+}
