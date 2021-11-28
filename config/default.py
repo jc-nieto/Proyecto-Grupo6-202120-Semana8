@@ -2,7 +2,7 @@ PROPAGATE_EXCEPTIONS = True
 APP_DEV = False
 
 # Database configuration
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://admin:gerzonEsUnCrack@mysql-database-01.ccieufxfelfu.us-east-1.rds.amazonaws.com:3306/convertion_db'
+SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://admin:gerzonEsUnCrack@mydb.cg99sgyfzyzj.us-east-1.rds.amazonaws.com:3306/myDB'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SHOW_SQLALCHEMY_LOG_MESSAGES = False
 
@@ -15,5 +15,5 @@ AWS_SESSION_TOKEN = "FwoGZXIvYXdzEAYaDD6MlsVx+pliA3+fiyLLAWzsbgKkIcPKCtswICH5G2w
 QUEUE_NAME = "consumers-queue.fifo"
 
 # Bucket S3
-#S3_BUCKET_NAME = "filetransformer"
-S3_BUCKET_NAME = "bucket-files-convertion"
+S3_BUCKET_NAME = "filetransformer"
+#S3_BUCKET_NAME = "bucket-files-convertion"
