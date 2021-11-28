@@ -1,30 +1,20 @@
-from flask import request, send_file
+from flask import request
 from flask_restful import Resource
-from werkzeug.datastructures import FileStorage
 from uuid import uuid1
 from typing import List
 from flask_jwt_extended import get_jwt_identity, jwt_required
-
 from common.error_handling import ObjectNotFound, NotAllowed
 from models import Tarea, Usuario
 from ..schemas import TareaSchema
 import os
-import subprocess
-from db import db
-from celery import Celery
-from config import CELERY_RESULT_BACKEND, CELERY_BROKER_URL
+from ..aws import queue
+
 
 UPLOAD_DIRECTORY = "./data/input"
 OUTPUT_DIRECTORY = "./data/output"
-S3_NAME="filetransformer"
+S3_NAME = "bucket-files-convertion"
 
 tarea_schema = TareaSchema()
-
-celery_app = Celery('tareas', broker=CELERY_BROKER_URL)
-
-# def withoutPaths(tarea):
-#     inputpath, outputpath, rest = (lambda inputpath, outputpath, **rest: (inputpath, outputpath, rest))(**tarea)
-#     return rest
 
 
 def obtainInputFormat(file):
@@ -38,7 +28,21 @@ def obtainInputFormat(file):
     return outputFormat
 
 
+def send_message(process, message):
+    print('Connected to: {0}!'.format(queue.url))
+    queue.send_message(
+        MessageBody=str(message),
+        MessageGroupId=process,
+        MessageAttributes={'Task': {
+            'StringValue': process,
+            'DataType': 'String'
+            }
+        }
+    )
+
+
 class TaskResource(Resource):
+
     @jwt_required()
     def get(self, id_task):
         tarea: Tarea = Tarea.get_by_id(id_task)
@@ -59,7 +63,7 @@ class TaskResource(Resource):
         tasks: List[Tarea] = []
         if os.path.exists(tarea.outputpath):
             os.remove(tarea.outputpath)
-        os.system('/usr/local/bin/aws s3 rm s3://{}/output/{}.{}'.format(S3_NAME,tarea.nombre,tarea.outputformat)) 
+        os.system('/usr/local/bin/aws s3 rm s3://{}/output/{}.{}'.format(S3_NAME, tarea.nombre, tarea.outputformat))
         try:
             newFormat = request.form.get('newFormat')
             outPath = os.path.join(
@@ -70,8 +74,7 @@ class TaskResource(Resource):
             tarea.save()
             tasks.append(tarea)
             for task in tasks:
-                celery_app.send_task('procesar_tarea', args=(
-                    task.id,), queue='procesar')
+                send_message('process_task', task.id)
             return tarea_schema.dump(tarea)
         except Exception as e:
             print(e)
@@ -84,8 +87,7 @@ class TaskResource(Resource):
         if tarea.usuario_task != get_jwt_identity():
             raise NotAllowed('No tiene permisos para realizar ésta acción')
 
-        celery_app.send_task('borrar_tarea', args=(
-            tarea.id,), queue='procesar')
+        send_message('delete_task', tarea.id)
         if os.path.exists(tarea.inputpath):
             os.remove(tarea.inputpath)
         if os.path.exists(tarea.outputpath):
@@ -118,6 +120,7 @@ class TaskListResource(Resource):
         tareasJson = [tarea_schema.dump(tarea) for tarea in tareas]
         return tareasJson
 
+
     @jwt_required()
     def post(self):
         user_id = get_jwt_identity()
@@ -147,7 +150,6 @@ class TaskListResource(Resource):
             tasks.append(tarea)
 
         for task in tasks:
-            celery_app.send_task('procesar_tarea', args=(
-                task.id,), queue='procesar')
+            send_message('process_task', task.id)
 
         return {'mensaje': 'La tarea fue creada con éxito'}

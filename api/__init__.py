@@ -2,7 +2,6 @@ from flask import Flask, jsonify
 from flask_restful import Api
 
 from api.resources import jwt
-from api.tasks import celery_app
 from sqlalchemy.exc import IntegrityError
 from common.error_handling import ObjectNotFound, AppErrorBaseClass, NotAllowed, NotReady
 from db import db
@@ -40,17 +39,6 @@ def create_app(settings_module):
     register_error_handlers(app)
     return app
 
-def make_celery(app):
-
-    celery_app.conf.update(app.config)
-
-    class ContextTask(celery_app.Task):
-        def __call__(self, *args, **kwargs):
-            with app.app_context():
-                return self.run(*args, **kwargs)
-
-    celery_app.Task = ContextTask
-    return celery_app
 
 def register_error_handlers(app):
 

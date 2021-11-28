@@ -17,11 +17,8 @@
 ```	
    export FLASK_APP="entrypoint:app"
 ```
-- Ejecución de la API desde la raiz del proyecto
-```	
+- Ejecución de la API
+```
+   export FLASK_APP="entrypoint:app"
    flask run
-```
-- Ejecución de plataforma de mensajeria desde la raiz del proyecto
-```
-   celery -A entrypoint.celery_app worker -l info -Q procesar
 ```

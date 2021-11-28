@@ -1,19 +1,19 @@
 from __future__ import print_function
-
 from argon2.exceptions import VerifyMismatchError
 from flask_restful import Resource
 from flask import request
 from models import Usuario
 from db import db
-from flask_jwt_extended import jwt_required, create_access_token, get_jwt, get_jwt_identity, JWTManager
+from flask_jwt_extended import create_access_token, JWTManager
 from helpers import encryptPassword, checkPassword
 from marshmallow.exceptions import ValidationError
-from common.error_handling import ObjectNotFound, NotAllowed
+from common.error_handling import NotAllowed
 
 jwt = JWTManager()
 
 
 class SignInResource(Resource):
+
     def post(self):
         if request.json["contrasena1"] != request.json["contrasena2"]:
             raise NotAllowed("Las contraseñas no coinciden")
@@ -26,8 +26,8 @@ class SignInResource(Resource):
         return {"mensaje": "usuario creado exitosamente", "token": token_de_acceso}
 
 
-
 class LogInResource(Resource):
+
     def post(self):
         try:
             usuario = Usuario.query.filter(Usuario.username == request.json["username"]).first()
