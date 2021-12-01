@@ -1,19 +1,15 @@
 import boto3
-from botocore.exceptions import ClientError
+from config import AWS_SESSION_TOKEN, AWS_SECRET_KEY, AWS_ACCESS_KEY, S3_BUCKET_NAME
 
-from config import APP_DEV, AWS_SESSION_TOKEN, AWS_SECRET_KEY, AWS_ACCESS_KEY, S3_BUCKET_NAME
 
 bucket_name = S3_BUCKET_NAME
 
-s3 = boto3.resource('s3')
-
-if APP_DEV:
-    s3 = boto3.resource(
-        's3',
-        aws_access_key_id=AWS_ACCESS_KEY,
-        aws_secret_access_key=AWS_SECRET_KEY,
-        aws_session_token=AWS_SESSION_TOKEN
-    )
+s3 = boto3.resource(
+    's3',
+    aws_access_key_id=AWS_ACCESS_KEY,
+    aws_secret_access_key=AWS_SECRET_KEY,
+    aws_session_token=AWS_SESSION_TOKEN
+)
 
 
 def download_file(file_name, path):
