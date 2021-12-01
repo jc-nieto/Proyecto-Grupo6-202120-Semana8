@@ -22,7 +22,7 @@ AWS_SESSION_TOKEN = env.get('AWS_SESSION_TOKEN', 'FwoGZXIvYXdzEP///////////wEaDJ
 
 # AWS - SQS & Bucket S3
 QUEUE_NAME = env.get('AWS_QUEUE_NAME', 'consumers-queue.fifo')
-S3_BUCKET_NAME = env.get('AWS_S3_BUCKET_NAME', 'filetransformer')
+S3_BUCKET_NAME = env.get('AWS_S3_BUCKET_NAME', 'filetransformeraws4')
 
 print('Settings:')
 print('connection db: {0}'.format(SQLALCHEMY_DATABASE_URI))
