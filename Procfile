@@ -1,1 +1,1 @@
-web: gunicorn entrypint:worker
+web: gunicorn entrypoint:worker
