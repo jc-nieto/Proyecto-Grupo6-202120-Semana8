@@ -1,1 +1,1 @@
-web: gunicorn entrypoint:worker
+web:  flask run
