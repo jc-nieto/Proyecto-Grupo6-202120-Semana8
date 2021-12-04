@@ -5,3 +5,4 @@ pymysql
 boto3~=1.20.14
 botocore~=1.23.14
 sendgrid==6.9.2
+ffmpeg==4.2.4
