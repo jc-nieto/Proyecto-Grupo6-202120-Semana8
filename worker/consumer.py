@@ -23,7 +23,7 @@ def change_state(task):
     message = Mail(
         from_email='jc.nieto@uniandes.edu.co',
         to_emails='juanc_nz@hotmail.com',
-        subject='Archivo ID: '+ task.id,
+        subject='Archivo ID: {}'.format(task.id),
         html_content='<strong>El archivo ha sido procesado</strong>')
     try:
         sg = SendGridAPIClient(os.environ.get('APIKeyEmail'))
