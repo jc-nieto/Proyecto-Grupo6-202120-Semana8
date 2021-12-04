@@ -17,8 +17,8 @@ def convert_file(task):
 
 
 def change_state(task):
-    usuario: Usuario=Usuario.get_by_id(task.id)
-    task: Tarea = Tarea.get_by_id(task.usuario_task)
+    usuario: Usuario=Usuario.get_by_id(task.usuario_task)
+    task: Tarea = Tarea.get_by_id(task.id)
     task.estado = 'processed'
     task.save()
     message = Mail(
