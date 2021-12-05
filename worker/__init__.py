@@ -1,7 +1,7 @@
 from flask import Flask
 from db import db
 import logging
-
+import consumer
 
 def create_app(settings_module):
     app = Flask(__name__)
@@ -18,5 +18,5 @@ def create_app(settings_module):
 
     # Disable strict URL finishing mode with /
     app.url_map.strict_slashes = False
-
+    worker = consumer.process_messages()
     return app
