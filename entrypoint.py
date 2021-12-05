@@ -2,7 +2,7 @@ try:
     from worker import create_app #, consumer
 
     settings_module = 'config.default'
-    worker = create_app(settings_module)
+    create_app(settings_module)
     #worker = consumer.process_messages()
 
     
