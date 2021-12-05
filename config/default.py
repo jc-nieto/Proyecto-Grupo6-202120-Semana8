@@ -33,4 +33,4 @@ print('Bucket name aws: {0}'.format(S3_BUCKET_NAME))
 
 # SendGrid ON
 
-EMAIL_ON = True
+EMAIL_ON = env.get('EMAIL_ON','ON')

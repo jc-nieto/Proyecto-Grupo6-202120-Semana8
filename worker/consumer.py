@@ -21,7 +21,7 @@ def change_state(task):
     task: Tarea = Tarea.get_by_id(task.id)
     task.estado = 'processed'
     task.save()
-    if EMAIL_ON == True :
+    if EMAIL_ON == 'ON' :
         message = Mail(
             from_email='jc.nieto@uniandes.edu.co',
             to_emails=usuario.email,
