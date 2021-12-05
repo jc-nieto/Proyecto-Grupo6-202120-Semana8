@@ -18,9 +18,8 @@ class FileResource(Resource):
         if tarea.usuario_task != get_jwt_identity():
             raise NotAllowed('No tiene permisos para realizar ésta acción')
 
-        file_name = '{0}.{1}'.format(tarea.nombre, tarea.inputformat)
-
         if type_process == 'input':
+            file_name = '{0}.{1}'.format(tarea.nombre, tarea.inputformat)
             path = tarea.inputpath
             download_file(file_name, path, type_process)
 
@@ -28,6 +27,7 @@ class FileResource(Resource):
             os.remove(os.path.abspath(path))
             return file
         elif tarea.estado == 'processed' and type_process == 'output':
+            file_name = '{0}.{1}'.format(tarea.nombre, tarea.outputformat)
             path = tarea.outputpath
             download_file(file_name, path, type_process)
 
