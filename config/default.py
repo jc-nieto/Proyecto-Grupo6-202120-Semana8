@@ -30,3 +30,7 @@ print('Secret key aws: {0}'.format(AWS_SECRET_KEY))
 print('Token session aws: {0}'.format(AWS_SESSION_TOKEN))
 print('Queue name aws: {0}'.format(QUEUE_NAME))
 print('Bucket name aws: {0}'.format(S3_BUCKET_NAME))
+
+# SendGrid ON
+
+EMAIL_ON = True
